@@ -14,7 +14,7 @@ class GpxConverter implements GeojsonConverterInterface
 
     public function convert(): string
     {
-        $xml = simplexml_load_string($this->fileContent);
+        $xml = simplexml_load_string($this->fileContent, options: LIBXML_NOERROR);
         if ($xml === false) {
             throw new InvalidXmlException("Error parsing the GPX file.");
         }
