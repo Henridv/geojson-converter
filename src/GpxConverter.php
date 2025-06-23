@@ -117,17 +117,27 @@ class GpxConverter implements GeojsonConverterInterface
                 $trackSegments[] = $segmentPoints;
             }
 
-            $features[] = [
+            $feature = [
                 'type' => 'Feature',
                 'properties' => [
                     'name' => (string) $trk->name,
                     'description' => (string) $trk->desc,
-                ],
-                'geometry' => [
-                    'type' => 'MultiLineString',
-                    'coordinates' => $trackSegments
                 ]
             ];
+
+            if (count($trackSegments) == 1) {
+                $feature['geometry'] = [
+                    'type' => 'LineString',
+                    'coordinates' => $trackSegments[0],
+                ];
+            } else {
+                $feature['geometry'] = [
+                    'type' => 'MultiLineString',
+                    'coordinates' => $trackSegments
+                ];
+            }
+
+            $features[] = $feature;
         }
         return $features;
     }

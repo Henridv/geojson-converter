@@ -90,8 +90,37 @@ class GpxConverterTest extends TestCase
         $this->assertEquals('FeatureCollection', $data['type']);
         $this->assertCount(1, $data['features']);
         $feature = $data['features'][0];
+        $this->assertEquals('LineString', $feature['geometry']['type']);
+        $this->assertEquals([[9.0, 45.0, 100.0], [9.1, 45.1, 110.0]], $feature['geometry']['coordinates']);
+        $this->assertEquals('Test Track', $feature['properties']['name']);
+        $this->assertEquals('Track Desc', $feature['properties']['description']);
+    }
+
+    public function testConvertReturnsValidGeoJsonForTrackWithMultipleSegments()
+    {
+        $gpx = '<?xml version="1.0" encoding="UTF-8"?>
+        <gpx version="1.1" creator="test">
+            <trk>
+                <name>Test Track</name>
+                <desc>Track Desc</desc>
+                <trkseg>
+                    <trkpt lat="45.0" lon="9.0"><ele>100</ele></trkpt>
+                    <trkpt lat="45.1" lon="9.1"><ele>110</ele></trkpt>
+                </trkseg>
+                <trkseg>
+                    <trkpt lat="45.2" lon="9.0"><ele>100</ele></trkpt>
+                    <trkpt lat="45.3" lon="9.1"><ele>110</ele></trkpt>
+                </trkseg>
+            </trk>
+        </gpx>';
+        $converter = new GpxConverter($gpx);
+        $geojson = $converter->convert();
+        $data = json_decode($geojson, true);
+        $this->assertEquals('FeatureCollection', $data['type']);
+        $this->assertCount(1, $data['features']);
+        $feature = $data['features'][0];
         $this->assertEquals('MultiLineString', $feature['geometry']['type']);
-        $this->assertEquals([[[9.0, 45.0, 100.0], [9.1, 45.1, 110.0]]], $feature['geometry']['coordinates']);
+        $this->assertEquals([[[9.0, 45.0, 100.0], [9.1, 45.1, 110.0]],[[9.0, 45.2, 100.0], [9.1, 45.3, 110.0]]], $feature['geometry']['coordinates']);
         $this->assertEquals('Test Track', $feature['properties']['name']);
         $this->assertEquals('Track Desc', $feature['properties']['description']);
     }
